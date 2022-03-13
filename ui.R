@@ -11,6 +11,7 @@ shinyUI(fluidPage(
         
         titlePanel("CJ's Pourover Coffee Brewing Guide"),
         
+        
         sidebarLayout(
                 sidebarPanel(
                         selectInput("coffee", "Which coffee are you brewing?",
@@ -22,7 +23,9 @@ shinyUI(fluidPage(
                                                    600g = coffee to share on a weekday<br>
                                                    800g = a full carafe for weekends"),
                                     value = 600, min = 250, max = 800, step = 50),
-                        submitButton("Let's Brew Coffee!")
+                        submitButton("Let's Brew Coffee!"),
+                        br(),
+                        HTML("<p>Check out the underlying code on <a href='https://github.com/cjarayata/coffee-shiny'>GitHub!</a>")
                 ),
                 
                 mainPanel(
