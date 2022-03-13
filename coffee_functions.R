@@ -110,5 +110,6 @@ give_me_coffee <- function(coffee, target_volume, brew_method = "hoffman", coffe
                            volume = "Volume (g)") %>% 
                 cols_align(align = c("center"),
                            columns = c(time, volume)) %>% 
-                opt_row_striping(TRUE)
+                opt_row_striping(TRUE) %>% 
+                tab_source_note("Note: Swirl the V60 during bloom phase and after second pour for even extraction.")
 }
