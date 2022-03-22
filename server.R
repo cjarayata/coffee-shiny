@@ -15,12 +15,11 @@ shinyServer(function(input, output, session) {
                                 target_volume = input$volume,
                                 brew_method = input$method,
                                 coffee_data),
-                          # height = px(600),
-                          width = px(600))
+                          width = px(400))
         })
         
         # shoutout to stackoverflow user "florian"!
-         # Initialize the timer, not active.
+        # Initialize the timer, not active.
           timer <- reactiveVal(0)
           active <- reactiveVal(FALSE)
           update_interval = 1 # How many seconds between timer updates?

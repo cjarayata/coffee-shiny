@@ -9,7 +9,7 @@ coffee_data <- read_csv("coffee_data.csv", show_col_types = F)
 
 shinyUI(fluidPage(
         
-        titlePanel("CJ's Pourover Coffee Brewing Guide"),
+        titlePanel("CJ's Coffee Brewing Guide"),
         
         
         sidebarLayout(
@@ -17,7 +17,9 @@ shinyUI(fluidPage(
                         selectInput("coffee", "Which coffee are you brewing?",
                                     choices = coffee_data$coffee_brand),
                         selectInput("method", "Which brewing method are you using?",
-                                    list("Hoffman V60" = "hoffman")),
+                                    list("Hoffman V60" = "hoffmann v60",
+                                         "Hoffman French Press" = "hoffmann french press",
+                                         "Traditional French Press" = "french press")),
                         sliderInput("volume", "How much coffee are you making?",
                                     value = 600, min = 250, max = 800, step = 50),
                         HTML("For reference:<br>
