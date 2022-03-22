@@ -11,7 +11,7 @@ find_ratio <- function(coffee, brew_method, coffee_lookup){
         if(nrow(coffee_row) == 0 && brew_method == "hoffmann v60"){
                 ratio <- 0.055
         }
-        if(nrow(coffee_row) == 0 && brew_method == "hoffmann french press"){
+        if(nrow(coffee_row) == 0 && str_detect(brew_method, "french press")){
                 ratio <- 0.07
         }
         
@@ -22,7 +22,7 @@ find_ratio <- function(coffee, brew_method, coffee_lookup){
         if(nrow(coffee_row) >= 1 && brew_method == "hoffmann v60"){
                 ratio <- coffee_row %>% pull(pourover_ratio)
         }
-        if(nrow(coffee_row) >= 1 && brew_method == "hoffmann french press"){
+        if(nrow(coffee_row) >= 1 && str_detect(brew_method, "french press")){
                 ratio <- coffee_row %>% pull(french_press_ratio)
         }
         if(nrow(coffee_row) >= 1 && brew_method == "onyx"){
@@ -33,10 +33,21 @@ find_ratio <- function(coffee, brew_method, coffee_lookup){
 }
 
 find_grind_size <- function(brew_method){
-        grind_size <- case_when(brew_method == "hoffmann v60" ~ 14,
-                                brew_method == "hoffmann french press" ~ 30,
+        grind_size <- case_when(# nizza needs a larger grind to obtain target brew times
+                                brew_method == "hoffmann v60" &
+                                        coffee == "La Colombe - Nizza - Medium Roast" ~ 18,
+                                brew_method == "hoffman v60" ~ 14,
+                                str_detect(brew_method, "french press") ~ 30,
                                 brew_method == "onyx" ~ 18)
         return(grind_size)
+}
+
+find_water_temp <- function(brew_method, coffee){
+        # give me 205 for everything, except when using nizza
+        water_temp <- case_when(brew_method == "hoffmann v60" &
+                                        coffee == "La Colombe - Nizza - Medium Roast" ~ 195,
+                                TRUE ~ 205)
+        return(water_temp)
 }
 
 # Generate a data.frame that has pour phases and approximate times.
@@ -54,8 +65,7 @@ pour_timing <- function(target_volume, brew_method){
                        target_volume >= 250 ~ "~ 3:00",
                        TRUE ~ "< 3:00")
         
-        # This is currently only written for Hoffmann v60, but can be expanded for
-        # Onyx and French Press methods
+        # This is currently only written for Hoffmann v60 and french press methods
         df <- data.frame(brew_phase = c("Bloom",
                                         "1st Pour",
                                         "2nd Pour",
@@ -88,14 +98,28 @@ pour_timing <- function(target_volume, brew_method){
                                   "Up to 15 minutes"))
         return(df)
         }
+        
+        if(brew_method == "french press"){
+        df <- data.frame(brew_phase = c("Bloom",
+                                        "Pour",
+                                        "Plunge",
+                                        "Total Brew Time"))
+        df <- df %>% mutate(time = c("30 seconds",
+                                  "After bloom",
+                                  "At 4 minutes",
+                                  "4 to 5 minutes"))
+        return(df)        
+        }
 }
 
 # Function to output a nice gt() brew guide for making the defined coffee, volume, and brew method.
 # Currently only written for James Hoffmann v60.
-give_me_coffee <- function(coffee, target_volume, brew_method = "hoffmann v60", coffee_lookup){
+give_me_coffee <- function(coffee, target_volume, brew_method = "hoffmann v60", coffee_data){
         
         # first, find ideal ratio for given brew method using function
-        ratio <- coffee %>% find_ratio(brew_method, coffee_lookup)
+        ratio <- coffee %>% find_ratio(brew_method, coffee_data)
+        
+        water_temp <- find_water_temp(brew_method, coffee)
         
         # find grind size for given brew method
         grind_size <- find_grind_size(brew_method)
@@ -113,7 +137,7 @@ give_me_coffee <- function(coffee, target_volume, brew_method = "hoffmann v60", 
                 new_df <- pour_timing(target_volume, brew_method) %>% 
                         mutate(volume = c(bloom_amt,
                                                 pour_one_vol,
-                                                pour_two_vol,
+                                                pour_one_vol + pour_two_vol,
                                                 target_volume))
                 
         }
@@ -122,14 +146,21 @@ give_me_coffee <- function(coffee, target_volume, brew_method = "hoffmann v60", 
                 mutate(volume = target_volume)
         
         }
-        # return(new_df)
+        if(brew_method == "french press"){
+        new_df <- pour_timing(target_volume, brew_method) %>% 
+                mutate(volume = c(bloom_amt,
+                                  target_volume,
+                                  target_volume,
+                                  target_volume))
+        
+        }
         
         # return a gt() table that has this information for you!
         gt_table <- 
                 new_df %>% 
                 gt() %>% 
                 tab_header(title = md(glue("**Brew Guide for {str_to_title(brew_method)}**")),
-                           subtitle = md(glue("**{coffee_needed}g** of {coffee}, Grind Size #{grind_size}"))) %>% 
+                           subtitle = md(glue("**{coffee_needed}g** of {coffee}. Grind Size #{grind_size}. Water @ {water_temp} F"))) %>% 
                 cols_label(brew_phase = "Brew Phase",
                            time = "Time",
                            volume = "Volume (g)") %>% 
@@ -141,6 +172,14 @@ give_me_coffee <- function(coffee, target_volume, brew_method = "hoffmann v60", 
         if(brew_method == "hoffmann v60"){
         gt_table <- gt_table %>%
                 tab_source_note("Note: Swirl the V60 during bloom phase and after second pour for even extraction.")
+        }
+        if(brew_method == "hoffmann french press"){
+        gt_table <- gt_table %>%
+                tab_source_note("Note: Only plunge to top of liquid so as to not disturb grounds.")
+        }
+        if(brew_method == "french press"){
+        gt_table <- gt_table %>%
+                tab_source_note("Note: Plunge to bottom of carafe.")
         }
         
         return(gt_table)

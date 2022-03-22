@@ -15,7 +15,6 @@ shinyServer(function(input, output, session) {
                                 target_volume = input$volume,
                                 brew_method = input$method,
                                 coffee_data),
-                          # height = px(600),
                           width = px(400))
         })
         
