@@ -32,11 +32,11 @@ find_ratio <- function(coffee, brew_method, coffee_lookup){
         return(ratio)
 }
 
-find_grind_size <- function(brew_method){
+find_grind_size <- function(brew_method, coffee){
         grind_size <- case_when(# nizza needs a larger grind to obtain target brew times
                                 brew_method == "hoffmann v60" &
                                         coffee == "La Colombe - Nizza - Medium Roast" ~ 18,
-                                brew_method == "hoffman v60" ~ 14,
+                                brew_method == "hoffmann v60" ~ 14,
                                 str_detect(brew_method, "french press") ~ 30,
                                 brew_method == "onyx" ~ 18)
         return(grind_size)
@@ -122,7 +122,7 @@ give_me_coffee <- function(coffee, target_volume, brew_method = "hoffmann v60", 
         water_temp <- find_water_temp(brew_method, coffee)
         
         # find grind size for given brew method
-        grind_size <- find_grind_size(brew_method)
+        grind_size <- find_grind_size(brew_method, coffee)
         
         # take that ratio, and multiply by volume to get coffee needed.
         coffee_needed <- round(ratio * target_volume, 0)
