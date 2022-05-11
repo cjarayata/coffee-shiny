@@ -11,11 +11,22 @@ shinyServer(function(input, output, session) {
         
         observeEvent(input$brew_table, {
                 output$table <-
-                render_gt(give_me_coffee(coffee = input$coffee,
+                if( input$lcornot == "A La Colombe coffee"){
+                        render_gt(give_me_coffee(coffee = input$coffee,
                                 target_volume = input$volume,
                                 brew_method = input$method,
                                 coffee_data),
                           width = px(400))
+                } else {
+                        render_gt(give_me_custom_coffee(
+                                customcoffee = input$customcoffee,
+                                grindsize = input$grindsize,
+                                coffeeamt = input$coffeeamt,
+                                temperature = input$temperature,
+                                target_volume = input$volume,
+                                brew_method = input$method),
+                                width = px(400))
+                }
         })
         
         # shoutout to stackoverflow user "florian"!
