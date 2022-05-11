@@ -186,3 +186,73 @@ give_me_coffee <- function(coffee, target_volume, brew_method = "hoffmann v60", 
         
         return(gt_table)
 }
+
+# code bloat but i'll fix this later and streamline with above function
+give_me_custom_coffee <- function(customcoffee, grindsize, coffeeamt, temperature, target_volume, brew_method = "hoffmann v60"){
+        
+        # all of the variables are now user-defined
+        coffee <- customcoffee
+        water_temp <- temperature
+        grind_size <- grindsize
+        coffee_needed <- coffeeamt
+        bloom_amt <- coffee_needed * 2
+        
+        if(brew_method == "hoffmann v60"){
+        # use 60/40 split to get intermediate volumes for pour phases
+                pour_one_vol <- target_volume * .6
+                pour_two_vol <- target_volume * .4
+                
+                # use volume to determine what target brew time should be
+                new_df <- pour_timing(target_volume, brew_method) %>% 
+                        mutate(volume = c(bloom_amt,
+                                                pour_one_vol,
+                                                pour_one_vol + pour_two_vol,
+                                                target_volume))
+                
+        }
+        if(brew_method == "hoffmann french press"){
+        new_df <- pour_timing(target_volume, brew_method) %>% 
+                mutate(volume = target_volume)
+        
+        }
+        if(brew_method == "french press"){
+        new_df <- pour_timing(target_volume, brew_method) %>% 
+                mutate(volume = c(bloom_amt,
+                                  target_volume,
+                                  target_volume,
+                                  target_volume))
+        
+        }
+        
+        # return a gt() table that has this information for you!
+        gt_table <- 
+                new_df %>% 
+                gt() %>% 
+                tab_header(title = md(glue("**Brew Guide for {str_to_title(brew_method)}**")),
+                           subtitle = md(glue("**{coffee_needed}g** of {coffee}. Grind Size #{grind_size}. Water @ {water_temp} F"))) %>% 
+                cols_label(brew_phase = "Brew Phase",
+                           time = "Time",
+                           volume = "Volume (g)") %>% 
+                cols_align(align = c("center"),
+                           columns = c(time, volume)) %>% 
+                opt_row_striping(TRUE) %>% 
+                tab_source_note(HTML("Grind sizes are for Baratza Encore. Refer to <a href = 'https://honestcoffeeguide.com/guides/coffee-grind-size-chart' target = '_blank'> Honest Coffee's Grind Size Tool</a> for guidance for your particular grinder."))
+        
+        if(brew_method == "hoffmann v60"){
+        gt_table <- gt_table %>%
+                tab_source_note("Note: Swirl the V60 during bloom phase and after second pour for even extraction.")
+        }
+        if(brew_method == "hoffmann french press"){
+        gt_table <- gt_table %>%
+                tab_source_note("Note: Only plunge to top of liquid so as to not disturb grounds.")
+        }
+        if(brew_method == "french press"){
+        gt_table <- gt_table %>%
+                tab_source_note("Note: Plunge to bottom of carafe.")
+        }
+        
+        gt_table <- gt_table %>% 
+                tab_source_note("The grind size and temperature you've entered may have overwritten the defaults for a given brew method.")
+        
+        return(gt_table)
+}
