@@ -236,7 +236,7 @@ give_me_custom_coffee <- function(customcoffee, grindsize, coffeeamt, temperatur
                 cols_align(align = c("center"),
                            columns = c(time, volume)) %>% 
                 opt_row_striping(TRUE) %>% 
-                tab_source_note(HTML("Grind sizes are for Baratza Encore. Refer to <a href = 'https://honestcoffeeguide.com/guides/coffee-grind-size-chart' target = '_blank'> Honest Coffee's Grind Size Tool</a> for guidance for your particular grinder."))
+                tab_source_note(HTML("Need help nailing a grind size? Refer to <a href = 'https://honestcoffeeguide.com/guides/coffee-grind-size-chart' target = '_blank'> Honest Coffee's Grind Size Tool</a> for guidance for your particular grinder."))
         
         if(brew_method == "hoffmann v60"){
         gt_table <- gt_table %>%
