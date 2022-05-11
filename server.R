@@ -11,7 +11,7 @@ shinyServer(function(input, output, session) {
         
         observeEvent(input$brew_table, {
                 output$table <-
-                if( input$lcornot == "A La Colombe coffee"){
+                if( input$lcornot == "A La Colombe coffee that CJ has made before"){
                         render_gt(give_me_coffee(coffee = input$coffee,
                                 target_volume = input$volume,
                                 brew_method = input$method,
