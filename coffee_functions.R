@@ -43,10 +43,11 @@ find_grind_size <- function(brew_method, coffee){
 }
 
 find_water_temp <- function(brew_method, coffee){
-        # give me 205 for everything, except when using nizza
+        # give me 205 for everything, except when using nizza and a few others
         # and brazilian
         water_temp <- case_when(brew_method == "hoffmann v60" &
                                         coffee == "La Colombe - Nizza - Medium Roast" ~ 195,
+                                coffee == "La Colombe - Honduras (Decaf)" ~ 200,
                                 coffee == "La Colombe - Brazil - Beleza" ~ 200,
                                 TRUE ~ 205)
         return(water_temp)

@@ -15,10 +15,10 @@ shinyUI(fluidPage(
         sidebarLayout(
                 sidebarPanel(
                         selectInput("lcornot", "What coffee are you brewing?",
-                                    choices = c("A La Colombe coffee that CJ has made before", "Literally any other kind of coffee")),
+                                    choices = c("An Elixr or La Colombe coffee that CJ has made before", "Literally any other kind of coffee")),
                         conditionalPanel(
-                                condition = "input.lcornot == 'A La Colombe coffee that CJ has made before'",
-                                selectInput("coffee", "Which LC coffee are you brewing?",
+                                condition = "input.lcornot == 'An Elixr or La Colombe coffee that CJ has made before'",
+                                selectInput("coffee", "Which coffee are you brewing?",
                                     choices = coffee_data$coffee_brand)
                         ),
                         conditionalPanel(
@@ -29,8 +29,8 @@ shinyUI(fluidPage(
                                 numericInput("coffeeamt", "How many grams of coffee are you using?", value = 36)
                                 ),
                         selectInput("method", "Which brewing method are you using?",
-                                    list("Hoffman V60" = "hoffmann v60",
-                                         "Hoffman French Press" = "hoffmann french press",
+                                    list("Hoffmann V60" = "hoffmann v60",
+                                         "Hoffmann French Press" = "hoffmann french press",
                                          "Traditional French Press" = "french press")),
                         sliderInput("volume", "How much coffee are you making?",
                                     value = 600, min = 250, max = 800, step = 50),
