@@ -1,5 +1,12 @@
 coffee_data <- read_csv("coffee_data.csv", show_col_types = F)
 
+coffees_using_200_temp <- c("La Colombe - Honduras (Decaf)",
+                       "La Colombe - Brazil - Beleza",
+                       "Elixr - Treehouse Blend")
+
+coffees_using_16_grind <- c("Elixr - El Obraje",
+                            "Elixr - Treehouse Blend")
+
 # Grab the appropriate ratio for the method given. If the coffee doesn't exist,
 # return sensible defaults.
 find_ratio <- function(coffee, brew_method, coffee_lookup){
@@ -36,6 +43,7 @@ find_grind_size <- function(brew_method, coffee){
         grind_size <- case_when(# nizza needs a larger grind to obtain target brew times
                                 brew_method == "hoffmann v60" &
                                         coffee == "La Colombe - Nizza - Medium Roast" ~ 18,
+                                coffee %in% coffees_using_16_grind ~ 16,
                                 brew_method == "hoffmann v60" ~ 14,
                                 str_detect(brew_method, "french press") ~ 30,
                                 brew_method == "onyx" ~ 18)
@@ -44,11 +52,10 @@ find_grind_size <- function(brew_method, coffee){
 
 find_water_temp <- function(brew_method, coffee){
         # give me 205 for everything, except when using nizza and a few others
-        # and brazilian
+        # defined above
         water_temp <- case_when(brew_method == "hoffmann v60" &
                                         coffee == "La Colombe - Nizza - Medium Roast" ~ 195,
-                                coffee == "La Colombe - Honduras (Decaf)" ~ 200,
-                                coffee == "La Colombe - Brazil - Beleza" ~ 200,
+                                coffee %in% coffees_using_200_temp ~ 200,
                                 TRUE ~ 205)
         return(water_temp)
 }
@@ -128,7 +135,7 @@ give_me_coffee <- function(coffee, target_volume, brew_method = "hoffmann v60", 
         grind_size <- find_grind_size(brew_method, coffee)
         
         # take that ratio, and multiply by volume to get coffee needed.
-        coffee_needed <- round(ratio * target_volume, 0)
+        coffee_needed <- round(ratio * target_volume, 1)
         bloom_amt <- coffee_needed * 2
         
         if(brew_method == "hoffmann v60"){
