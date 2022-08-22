@@ -1,62 +1,46 @@
-coffee_data <- read_csv("coffee_data.csv", show_col_types = F)
+dialed_coffee <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRFRdo6gr0uTa3LNSdcMXdAq0MGQcb3OLKKnbpVxYOMogTvnZEHhiEvlQo4SZLJfHXaBVtCAjxZGX7J/pub?gid=561718715&single=true&output=csv")
 
-coffees_using_200_temp <- c("La Colombe - Honduras (Decaf)",
-                       "La Colombe - Brazil - Beleza",
-                       "Elixr - Treehouse Blend")
-
-coffees_using_16_grind <- c("Elixr - El Obraje",
-                            "Elixr - Treehouse Blend")
-
-# Grab the appropriate ratio for the method given. If the coffee doesn't exist,
-# return sensible defaults.
+# Grab the appropriate ratio from "dialed coffee"
 find_ratio <- function(coffee, brew_method, coffee_lookup){
         
-        coffee_row <- coffee_lookup %>% 
-                filter(coffee_brand == coffee)
-        
-        # if coffee cannot be found, use 0.055 to start
-        if(nrow(coffee_row) == 0 && brew_method == "hoffmann v60"){
-                ratio <- 0.055
-        }
-        if(nrow(coffee_row) == 0 && str_detect(brew_method, "french press")){
-                ratio <- 0.07
+        if(brew_method == "hoffmann v60"){
+                ratio <- coffee_lookup %>% 
+                        filter(coffee_brand == coffee) %>% 
+                        pull(v60_ratio)
         }
         
-        if(nrow(coffee_row) == 0 && brew_method == "onyx"){
-                ratio <- 0.065
+        # add 0.01 if it's french press, e.g. 0.06 becomes 0.07
+        if(str_detect(brew_method, "french press")){
+                ratio <- coffee_lookup %>% 
+                        filter(coffee_brand == coffee) %>% 
+                        pull(v60_ratio)
+                ratio <- ratio + 0.01
         }
-        
-        if(nrow(coffee_row) >= 1 && brew_method == "hoffmann v60"){
-                ratio <- coffee_row %>% pull(pourover_ratio)
-        }
-        if(nrow(coffee_row) >= 1 && str_detect(brew_method, "french press")){
-                ratio <- coffee_row %>% pull(french_press_ratio)
-        }
-        if(nrow(coffee_row) >= 1 && brew_method == "onyx"){
-        ratio <- coffee_row %>% pull(onyx_ratio)
-        }
-        
+
         return(ratio)
 }
 
-find_grind_size <- function(brew_method, coffee){
-        grind_size <- case_when(# nizza needs a larger grind to obtain target brew times
-                                brew_method == "hoffmann v60" &
-                                        coffee == "La Colombe - Nizza - Medium Roast" ~ 18,
-                                coffee %in% coffees_using_16_grind ~ 16,
-                                brew_method == "hoffmann v60" ~ 14,
-                                str_detect(brew_method, "french press") ~ 30,
-                                brew_method == "onyx" ~ 18)
+find_grind_size <- function(coffee, brew_method, coffee_lookup){
+        
+        if(brew_method == "hoffmann v60"){
+                grind_size <- coffee_lookup %>% 
+                        filter(coffee_brand == coffee) %>% 
+                        pull(v60_encore_size)
+        }
+        
+        # hard code french press to 30 across the board
+        if(str_detect(brew_method, "french press")){
+                grind_size <- 30
+        }
+
         return(grind_size)
 }
 
-find_water_temp <- function(brew_method, coffee){
-        # give me 205 for everything, except when using nizza and a few others
-        # defined above
-        water_temp <- case_when(brew_method == "hoffmann v60" &
-                                        coffee == "La Colombe - Nizza - Medium Roast" ~ 195,
-                                coffee %in% coffees_using_200_temp ~ 200,
-                                TRUE ~ 205)
+find_water_temp <- function(coffee, coffee_lookup){
+
+        water_temp <- coffee_lookup %>% 
+                        filter(coffee_brand == coffee) %>% 
+                        pull(temperature)
         return(water_temp)
 }
 
@@ -124,15 +108,15 @@ pour_timing <- function(target_volume, brew_method){
 
 # Function to output a nice gt() brew guide for making the defined coffee, volume, and brew method.
 # Currently only written for James Hoffmann v60.
-give_me_coffee <- function(coffee, target_volume, brew_method = "hoffmann v60", coffee_data){
+give_me_coffee <- function(coffee, target_volume, brew_method = "hoffmann v60", dialed_coffee){
         
         # first, find ideal ratio for given brew method using function
-        ratio <- coffee %>% find_ratio(brew_method, coffee_data)
+        ratio <- find_ratio(coffee, brew_method, dialed_coffee)
         
-        water_temp <- find_water_temp(brew_method, coffee)
+        water_temp <- find_water_temp(coffee, dialed_coffee)
         
         # find grind size for given brew method
-        grind_size <- find_grind_size(brew_method, coffee)
+        grind_size <- find_grind_size(coffee, brew_method, dialed_coffee)
         
         # take that ratio, and multiply by volume to get coffee needed.
         coffee_needed <- round(ratio * target_volume, 1)

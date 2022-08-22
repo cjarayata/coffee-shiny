@@ -5,7 +5,8 @@ library(tidyverse)
 library(gt)
 library(glue)
 
-coffee_data <- read_csv("coffee_data.csv", show_col_types = F)
+dialed_coffee <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRFRdo6gr0uTa3LNSdcMXdAq0MGQcb3OLKKnbpVxYOMogTvnZEHhiEvlQo4SZLJfHXaBVtCAjxZGX7J/pub?gid=561718715&single=true&output=csv") %>% 
+        filter(currently_brewing)
 
 shinyUI(fluidPage(
         
@@ -15,11 +16,11 @@ shinyUI(fluidPage(
         sidebarLayout(
                 sidebarPanel(
                         selectInput("lcornot", "What coffee are you brewing?",
-                                    choices = c("An Elixr or La Colombe coffee that CJ has made before", "Literally any other kind of coffee")),
+                                    choices = c("CJs Current Stash", "Literally any other kind of coffee")),
                         conditionalPanel(
-                                condition = "input.lcornot == 'An Elixr or La Colombe coffee that CJ has made before'",
+                                condition = "input.lcornot == 'CJs Current Stash'",
                                 selectInput("coffee", "Which coffee are you brewing?",
-                                    choices = coffee_data$coffee_brand)
+                                    choices = dialed_coffee$coffee_brand)
                         ),
                         conditionalPanel(
                                 condition = "input.lcornot == 'Literally any other kind of coffee'",
@@ -59,6 +60,7 @@ shinyUI(fluidPage(
                 ),
                 
                 mainPanel(
+                        # add text output
                         gt_output(outputId = "table"),
                         br(),
                         h1(textOutput('stopwatch_time'), align = "center")
