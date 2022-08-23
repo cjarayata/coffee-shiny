@@ -4,6 +4,7 @@ library(shiny)
 library(tidyverse)
 library(lubridate)
 library(gt)
+library(glue)
 
 source("coffee_functions.R")
 
@@ -11,11 +12,11 @@ shinyServer(function(input, output, session) {
         
         observeEvent(input$brew_table, {
                 output$table <-
-                if( input$lcornot == "An Elixr or La Colombe coffee that CJ has made before"){
+                if( input$lcornot == "CJs Current Stash"){
                         render_gt(give_me_coffee(coffee = input$coffee,
                                 target_volume = input$volume,
                                 brew_method = input$method,
-                                coffee_data),
+                                dialed_coffee),
                           width = px(400))
                 } else {
                         render_gt(give_me_custom_coffee(
@@ -27,8 +28,20 @@ shinyServer(function(input, output, session) {
                                 brew_method = input$method),
                                 width = px(400))
                 }
-        })
+                })
         
+        output$ratio_display <- renderText({
+                if( input$lcornot == "CJs Current Stash"){
+                        ratio <- find_ratio(coffee = input$coffee,
+                                            brew_method = input$method,
+                                            dialed_coffee)
+                        glue("CJ's preferred ratio for this coffee is <b>1:{round(1/ratio, 1)}</b>, or <b>{ratio}</b>.")
+                } else {
+                        ratio <- input$coffeeamt / input$volume
+                        glue("Your amounts reflect a ratio of <b>1:{round(1/ratio, 1)}</b>, or <b>{ratio}</b>.")
+                }
+        })
+                  
         # shoutout to stackoverflow user "florian"!
         # Initialize the timer, not active.
           timer <- reactiveVal(0)
