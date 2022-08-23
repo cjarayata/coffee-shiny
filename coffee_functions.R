@@ -120,7 +120,7 @@ give_me_coffee <- function(coffee, target_volume, brew_method = "hoffmann v60", 
         
         # take that ratio, and multiply by volume to get coffee needed.
         coffee_needed <- round(ratio * target_volume, 1)
-        bloom_amt <- coffee_needed * 2
+        bloom_amt <- round(coffee_needed * 2, 0)
         
         if(brew_method == "hoffmann v60"){
         # use 60/40 split to get intermediate volumes for pour phases
@@ -154,7 +154,7 @@ give_me_coffee <- function(coffee, target_volume, brew_method = "hoffmann v60", 
                 new_df %>% 
                 gt() %>% 
                 tab_header(title = md(glue("**Brew Guide for {str_to_title(brew_method)}**")),
-                           subtitle = md(glue("**{coffee_needed}g** of {coffee}. Grind Size #{grind_size}. Water @ {water_temp} F"))) %>% 
+                           subtitle = md(glue("**{coffee_needed}g** of {coffee}. Grind Size **#{grind_size}**. Water @ **{water_temp}** F"))) %>% 
                 cols_label(brew_phase = "Brew Phase",
                            time = "Time",
                            volume = "Volume (g)") %>% 
@@ -221,7 +221,7 @@ give_me_custom_coffee <- function(customcoffee, grindsize, coffeeamt, temperatur
                 new_df %>% 
                 gt() %>% 
                 tab_header(title = md(glue("**Brew Guide for {str_to_title(brew_method)}**")),
-                           subtitle = md(glue("**{coffee_needed}g** of {coffee}. Grind Size #{grind_size}. Water @ {water_temp} F"))) %>% 
+                           subtitle = md(glue("**{coffee_needed}g** of {coffee}. Grind Size **#{grind_size}**. Water @ **{water_temp}** F"))) %>% 
                 cols_label(brew_phase = "Brew Phase",
                            time = "Time",
                            volume = "Volume (g)") %>% 

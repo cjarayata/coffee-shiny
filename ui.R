@@ -60,7 +60,8 @@ shinyUI(fluidPage(
                 ),
                 
                 mainPanel(
-                        # add text output
+                        htmlOutput('ratio_display'),
+                        br(),
                         gt_output(outputId = "table"),
                         br(),
                         h1(textOutput('stopwatch_time'), align = "center")

@@ -4,6 +4,7 @@ library(shiny)
 library(tidyverse)
 library(lubridate)
 library(gt)
+library(glue)
 
 source("coffee_functions.R")
 
@@ -27,8 +28,20 @@ shinyServer(function(input, output, session) {
                                 brew_method = input$method),
                                 width = px(400))
                 }
-        })
+                })
         
+        output$ratio_display <- renderText({
+                if( input$lcornot == "CJs Current Stash"){
+                        ratio <- find_ratio(coffee = input$coffee,
+                                            brew_method = input$method,
+                                            dialed_coffee)
+                        glue("CJ's preferred ratio for this coffee is <b>1:{round(1/ratio, 1)}</b>, or <b>{ratio}</b>.")
+                } else {
+                        ratio <- input$coffeeamt / input$volume
+                        glue("Your amounts reflect a ratio of <b>1:{round(1/ratio, 1)}</b>, or <b>{ratio}</b>.")
+                }
+        })
+                  
         # shoutout to stackoverflow user "florian"!
         # Initialize the timer, not active.
           timer <- reactiveVal(0)
