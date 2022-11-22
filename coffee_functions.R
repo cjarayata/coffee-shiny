@@ -248,3 +248,36 @@ give_me_custom_coffee <- function(customcoffee, grindsize, coffeeamt, temperatur
         
         return(gt_table)
 }
+
+make_faceted_ggplot <- function(filtered_df){
+        plot <- filtered_df %>% 
+        ggplot(aes(x = rating, y = ratio, fill = water_temp))+
+        geom_point(aes(size = 2, colour = water_temp),
+                   # position = position_jitterdodge()
+                   ) +
+        geom_label_repel(
+                aes(label = glue::glue("#{grind_size} {grinder} ({days_since_roast})")),
+                show.legend = T,
+                min.segment.length = 1,
+                segment.color = "red",
+                force        = 0.5,
+                nudge_x      = 0.5,
+                direction    = "y",
+                hjust        = 0.5,
+                segment.size = 0.5, max.overlaps = 12
+        ) +
+        coord_cartesian(xlim = c(7, 10)) +
+        scale_x_continuous(breaks = seq(7, 10, .5)) +
+        theme_classic() +
+        guides(size = "none",
+               colour = "none",
+               fill = guide_legend(
+    title = "Water Temp.",
+    override.aes = aes(label = ""))) +
+        lemon::facet_rep_wrap(~coffee, ncol = 1, repeat.tick.labels = T) +
+        theme(text = element_text(size = 20)) +
+        labs(x = "CJ's Rating",
+             y = "Coffee/Water Ratio")
+        
+        return(plot)
+}
